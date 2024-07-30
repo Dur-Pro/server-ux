@@ -74,6 +74,21 @@ class TierDefinition(models.Model):
         "Usefull in an Approve by sequence scenario. "
         "An notification request to review is sent out when it's their turn to review.",
     )
+    notify_on_accepted = fields.Boolean(
+        string="Notify Reviewers on Accepted",
+        help="If set, reviewers will be notified by email when a review related "
+        "to this definition is accepted.",
+    )
+    notify_on_rejected = fields.Boolean(
+        string="Notify Reviewers on Rejected",
+        help="If set, reviewers will be notified by email when a review related "
+        "to this definition is rejected.",
+    )
+    notify_on_restarted = fields.Boolean(
+        string="Notify Reviewers on Restarted",
+        help="If set, reviewers will be notified by email when a reviews related "
+        "to this definition are restarted.",
+    )
     has_comment = fields.Boolean(string="Comment", default=False)
     approve_sequence = fields.Boolean(
         string="Approve by sequence",
@@ -93,6 +108,8 @@ class TierDefinition(models.Model):
     @api.depends("review_type", "model_id")
     def _compute_domain_reviewer_field(self):
         for rec in self:
-            rec.valid_reviewer_field_ids = self.env["ir.model.fields"].search(
-                [("model", "=", rec.model), ("relation", "=", "res.users")]
+            rec.valid_reviewer_field_ids = (
+                self.env["ir.model.fields"]
+                .sudo()
+                .search([("model", "=", rec.model), ("relation", "=", "res.users")])
             )
